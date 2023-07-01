@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keyword Co-occurrence Analysis</title>
+    
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .file-input {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .submit-button {
+            margin-top: 20px;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+
+        /* Style the sidebar */
+        .sidebar {
+            height: 100%; /* Full-height */
+            width: 250px; /* Fixed width of the sidebar */
+            position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+            z-index: 1; /* Stay on top */
+            top: 0; /* Stay at the top */
+            left: 0;
+            background-color: #111; /* Black */
+            overflow-x: hidden; /* Disable horizontal scroll */
+            padding-top: 60px; /* Place content 60px from the top */
+        }
+
+        /* The sidebar links */
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #818181;
+            display: block;
+        }
+
+        /* When you mouse over the navigation links, change their color */
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+        .sidebar h5 {
+            padding: 8px 8px 8px 32px;
+            color: white;
+        }
+        /* Flexbox centering */
+        .d-flex {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .content-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1.display-3 {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="mySidebar">
+        <h5>View all dimensions</h5>
+        {% if dimension_html %}
+            {% for dimension, html in dimension_html.items() %}
+                <a href="#{{ dimension.replace('.', '_') }}">{{ dimension }}</a>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="container" style="margin-left: 250px;">
+        <div class="content-container">
+            <h1 class="display-3">Keyword Co-occurrence Analysis</h1>
+            
+            <h3>Upload your files</h3>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="corpus">Select Corpus Files:</label>
+                    <input type="file" id="corpus" name="corpus" multiple class="file-input">
+                </div>
+                <div class="form-group">
+                    <label for="keywords">Select Keyword File: Each keyword needs to be on a new line</label>
+                    <input type="file" id="keywords" name="keywords" class="file-input">
+                </div>
+                <input type="submit" value="Upload" class="btn btn-primary submit-button">
+            </form>
+        </div>
+        <div>
+            <form action="{{ url_for('end_session') }}" method="POST">
+                <button type="submit" class="btn btn-danger submit-button">End Session</button>
+            </form>
+        </div>
+        {% if table_html %}
+        <div>
+            <h2>Table Preview</h2>
+            {{ table_html|safe }}
+            <a href="{{ url_for('download', filename='table.csv') }}">Download CSV</a>
+        </div>
+        <div>
+            <h2>Reduced Table Preview</h2>
+            {{ reduced_table_html|safe }}
+            <a href="{{ url_for('download', filename='reduced_table.csv') }}">Download CSV</a>
+        </div>
+        {% endif %}
+
+        {% if dimension_html %}
+            {% for dimension, html in dimension_html.items() %}
+                <div id="{{ dimension.replace('.', '_') }}">
+                    <h2>{{ dimension }} - Keyword Preview</h2>
+                    {{ html.col|safe }}
+                    <a href="{{ url_for('download', filename=dimension+'_keywords.csv') }}">Download CSV</a>
+                    <h2>{{ dimension }} - File Preview</h2>
+                    {{ html.row|safe }}
+                    <a href="{{ url_for('download', filename=dimension+'_files.csv') }}">Download CSV</a>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>
